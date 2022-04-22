@@ -267,7 +267,7 @@ func main() {
 	// skip --> prints last 4 docs
 	fmt.Println("\nSkip: ")
 	{
-		cursor, err := coll.Find(context.TODO(), bson.D{}, options.Find().SetSkip(2))
+		cursor, err := coll.Find(context.TODO(), bson.D{}, options.Find().SetSkip(4))
 		var results []bson.D
 		if err = cursor.All(context.TODO(), &results); err != nil {
 			panic(err)
@@ -293,7 +293,7 @@ func main() {
 	// project --> prints all docs without the vendr field
 	fmt.Println("\nProject: ")
 	{
-		cursor, err := coll.Find(context.TODO(), bson.D{}, options.Find().SetProjection(bson.D{{"vendor", 0}}))
+		cursor, err := coll.Find(context.TODO(), bson.D{}, options.Find().SetProjection(bson.D{{"vendor", 0}, {"_id", 0}}))
 		if err != nil {
 			panic(err)
 		}
