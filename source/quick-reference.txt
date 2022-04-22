@@ -1,0 +1,460 @@
+.. _go-quick-reference:
+
+===============
+Quick Reference
+===============
+
+.. default-domain:: mongodb
+
+This page shows the driver syntax for several MongoDB commands and links to
+their related reference and API documentation.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 75
+
+   * - Command
+     - Syntax
+
+   * - | **Find a Document**
+       |
+       | `API Documentation <{+api+}/mongo#Collection.FindOne>`__
+       | :ref:`Usage Example <compound-operations-golang>`
+       | :ref:`Fundamentals <compound-operations-golang>`
+
+     - .. io-code-block::
+          :copyable: true
+
+          .. input::
+             :language: go
+
+             err = coll.FindOne(context.TODO(), bson.D{{"rating", 5}}).Decode(&result)
+
+          .. output::
+             :language: go
+
+             { "type": "Assam", "rating": 5 ...}
+
+   * - | **Find Multiple Documents**
+       |
+       | `API Documentation <{+api+}/mongo#Collection.Find>`__
+       | :ref:`Usage Example <compound-operations-golang>`
+       | :ref:`Fundamentals <compound-operations-golang>`
+
+     - .. io-code-block::
+          :copyable: true
+
+          .. input::
+             :language: go
+
+             cursor, err := coll.Find(context.TODO(), bson.D{{"rating", bson.D{{"$gte", 8}}}})
+
+          .. output::
+             :language: go
+
+             { "type": "Masala", "rating": 10, ... }
+             { "type": "Earl Grey", "rating": 8, ... }
+
+   * - | **Insert a Document**
+       |
+       | `API Documentation <{+api+}/mongo#Collection.InsertOne>`__
+       | :ref:`Usage Example <compound-operations-golang>`
+       | :ref:`Fundamentals <compound-operations-golang>`
+
+     - .. code-block:: go
+          :copyable: true
+
+          result, err := coll.InsertOne(context.TODO(), bson.D{{"type", "Masala"}, {"rating", 10}, {"vendor", bson.A{"A", "C"}}})
+
+   * - | **Insert Multiple Documents**
+       |
+       | `API Documentation <{+api+}/mongo#Collection.InsertMany>`__
+       | :ref:`Usage Example <compound-operations-golang>`
+       | :ref:`Fundamentals <compound-operations-golang>`
+
+     - .. code-block:: go
+          :copyable: true
+
+          docs := []interface{} {
+            bson.D{{"type", "English Breakfast"}, {"rating", 6}},
+            bson.D{{"type", "Oolong"}, {"rating", 7}, {"vendor", bson.A{"C"}}},
+            bson.D{{"type", "Assam"}, {"rating", 5}},
+            bson.D{{"type", "Earl Grey"}, {"rating", 8}, {"vendor", bson.A{"A", "B"}}},
+           }
+
+          result, err := coll.InsertMany(context.TODO(), docs)
+
+   * - | **Update a Document**
+       |
+       | `API Documentation <{+api+}/mongo#Collection.UpdateOne>`__
+       | :ref:`Usage Example <compound-operations-golang>`
+       | :ref:`Fundamentals <compound-operations-golang>`
+
+     - .. io-code-block::
+          :copyable: true
+
+          .. input::
+             :language: go
+
+             result, err := coll.UpdateOne(
+                context.TODO(), 
+                bson.D{{"type", "Oolong"}}, 
+                bson.D{{"$set", bson.D{{"rating", 8}}}})
+		
+
+          .. output::
+             :language: go
+
+             {{type Oolong}, {rating: 8} ...}
+
+   * - | **Update Multiple Documents**
+       |
+       | `API Documentation <{+api+}/mongo#Collection.UpdateMany>`__
+       | :ref:`Usage Example <compound-operations-golang>`
+       | :ref:`Fundamentals <compound-operations-golang>`
+
+     - .. io-code-block::
+          :copyable: true
+
+          .. input::
+             :language: go
+
+             result, err := coll.UpdateMany(
+               context.TODO(), 
+               bson.D{{"rating", bson.D{{"$lt", 10}}}}, 
+               bson.D{{"$inc", bson.D{{"rating", 2}}}}
+             )
+
+          .. output::
+             :language: go
+
+             [{type English Breakfast}, {rating 8}, ... ]
+             [{type Oolong}, {rating 9}, ... ]
+             ...
+
+   * - | **Update Arrays in Documents**
+       |
+       | `API Documentation <{+api+}/classes/Collection.html#update>`__
+       | :ref:`Fundamentals <compound-operations-golang>`
+
+     - .. io-code-block::
+          :copyable: true
+
+          .. input::
+             :language: go
+
+             result, err := coll.UpdateMany(
+               context.TODO(), 
+               bson.D{}, 
+               bson.D{{"$push", bson.D{{"vendor", "D"}}}}
+             )
+
+          .. output::
+             :language: js
+
+             [{type English Breakfast}, {vendor ["D"]}, ... ]
+             [{type Oolong}, {vendor ["C", "D"]}, ... ]
+             ...
+
+   * - | **Replace a Document**
+       |
+       | `API Documentation <{+api+}/classes/Collection.html#replaceOne>`__
+       | :ref:`Usage Example <compound-operations-golang>`
+       | :ref:`Fundamentals <compound-operations-golang>`
+
+     - .. io-code-block::
+          :copyable: true
+
+          .. input::
+             :language: go
+
+             result, err := coll.ReplaceOne(
+               context.TODO(), 
+               bson.D{{"type", "Oolong"}}, 
+               bson.D{{"type", "Jasmine"}, {"rating", 9}}
+             )
+
+          .. output::
+             :language: go
+
+             { "type": "Jasmine", "rating": 9, ... }
+
+   * - | **Delete a Document**
+       |
+       | `API Documentation <{+api+}/classes/Collection.html#deleteOne>`__
+       | :ref:`Usage Example <compound-operations-golang>`
+       | :ref:`Fundamentals <compound-operations-golang>`
+
+     - .. code-block:: go
+          :copyable: true
+
+          result, err := coll.DeleteOne(
+            context.TODO(), 
+            bson.D{{"type", "Earl Grey"}}
+          )
+
+   * - | **Delete Multiple Documents**
+       |
+       | `API Documentation <{+api+}/classes/Collection.html#deleteMany>`__
+       | :ref:`Usage Example <compound-operations-golang>`
+       | :ref:`Fundamentals <compound-operations-golang>`
+
+     - .. code-block:: go
+          :copyable: true
+
+          results, err := coll.DeleteMany(
+            context.TODO(), 
+            bson.D{{"rating", 
+            bson.D{{"$gt", 7}}}}
+          )
+
+   * - | **Bulk Write**
+       |
+       | `API Documentation <{+api+}/classes/Collection.html#bulkWrite>`__
+       | :ref:`Usage Example <compound-operations-golang>`
+
+     - .. io-code-block::
+          :copyable: true
+
+          .. input::
+             :language: go 
+
+             models := []mongo.WriteModel{
+               mongo.NewInsertOneModel().SetDocument(bson.D{{"type", "Chrysanthemum"}, {"rating", 5}}),
+               mongo.NewUpdateOneModel().SetFilter(bson.D{{"type", "Jasmine"}}).
+               SetUpdate(bson.D{{"$set", bson.D{{"type", "Oolong"}}}}),
+             }
+             opts := options.BulkWrite().SetOrdered(true)
+
+             results, err := coll.BulkWrite(context.TODO(), models, opts)
+
+          .. output::
+             :language: js
+
+             BulkWriteResult {
+               result: {
+                 ...
+               },
+               ...
+             }
+
+   * - | **Watch for Changes**
+       |
+       | `API Documentation <{+api+}/classes/Collection.html#watch>`__
+       | :ref:`Usage Example <compound-operations-golang>`
+       | :ref:`Fundamentals <compound-operations-golang>`
+
+     - .. code-block:: go
+          :copyable: true
+
+          pipeline := mongo.Pipeline{bson.D{{"$match", bson.D{{"operationType", "insert"}}}}}
+          cs, err := coll.Watch(context.TODO(), pipeline)
+
+   * - | **Access Data from a Cursor Iteratively**
+       |
+       | `API Documentation <{+api+}/classes/FindCursor.html#forEach>`__
+       | :ref:`Fundamentals <compound-operations-golang>`
+
+     - .. io-code-block::
+          :copyable: true
+
+          .. input::
+             :language: js
+
+             const cursor = coll.find();
+             await cursor.forEach(console.dir);
+             cursor, err := coll.Find(context.TODO(), bson.D{})
+
+             for cursor.Next(context.TODO()) {
+               var result bson.D
+               if err := cursor.Decode(&result); err != nil {
+                 log.Fatal(err)
+               }
+               fmt.Println(result)
+             }
+
+          .. output::
+             :language: go
+
+             [{type Masala} ... ]
+             [{type English Breakfast} ...]
+             [{type Oolong} ...]
+             ...
+
+   * - | **Access Data from a Cursor as an Array**
+       |
+       | `API Documentation <{+api+}/classes/FindCursor.html#toArray>`__
+       | :ref:`Fundamentals <compound-operations-golang>`
+
+     - .. io-code-block::
+          :copyable: true
+
+          .. input::
+             :language: go
+
+             cursor, err := coll.Find(context.TODO(), bson.D{})
+
+             var results []bson.D
+             if err = cursor.All(context.TODO(), &results); err != nil {
+               panic(err)
+             }
+
+          .. output::
+             :language: go
+
+             [{type Masala} ... ]
+             [{type English Breakfast} ...]
+             [{type Oolong} ...]
+             ...
+
+   * - | **Count Documents**
+       |
+       | `API Documentation <{+api+}/classes/Collection.html#countDocuments>`__
+       | :ref:`Usage Example <compound-operations-golang>`
+
+     - .. io-code-block::
+          :copyable: true
+
+          .. input::
+             :language: go
+
+             count, err := coll.CountDocuments(context.TODO(), bson.D{})
+
+          .. output::
+             :language: js
+
+             6
+
+   * - | **List the Distinct Documents or Field Values**
+       | `API Documentation <{+api+}/classes/Collection.html#distinct>`__
+       | :ref:`Usage Example <compound-operations-golang>`
+       | :ref:`Fundamentals <compound-operations-golang>`
+
+     - .. io-code-block::
+          :copyable: true
+
+          .. input::
+             :language: go
+
+             results, err := coll.Distinct(context.TODO(), "type", bson.D{})
+
+          .. output::
+             :language: go
+
+             Masala
+             Oolong
+             ...
+
+   * - | **Limit the Number of Documents Retrieved**
+       |
+       | `API Documentation <{+api+}/classes/FindCursor.html#limit>`__
+       | :ref:`Fundamentals <compound-operations-golang>`
+
+     - .. io-code-block::
+          :copyable: true
+
+          .. input::
+             :language: go
+
+             cursor, err := coll.Find(context.TODO(), bson.D{}, options.Find().SetLimit(2))
+
+          .. output::
+             :language: go
+
+             [{type Masala} ... ]
+             [{type English Breakfast} ...]
+
+   * - | **Skip Retrieved Documents**
+       |
+       | `API Documentation <{+api+}/classes/FindCursor.html#skip>`__
+       | :ref:`Fundamentals <compound-operations-golang>`
+
+     - .. io-code-block::
+          :copyable: true
+
+          .. input::
+             :language: go
+
+             cursor, err := coll.Find(context.TODO(), bson.D{}, options.Find().SetSkip(4))
+
+          .. output::
+             :language: go
+
+             [{type Earl Grey} ... ]
+             [{type Chrysanthemum} ...]
+
+   * - | **Sort the Documents When Retrieving Them**
+       |
+       | `API Documentation <{+api+}/classes/FindCursor.html#sort>`__
+       | :ref:`Fundamentals <compound-operations-golang>`
+
+     - .. io-code-block::
+          :copyable: true
+
+          .. input::
+             :language: go
+
+             cursor, err := coll.Find(context.TODO(), bson.D{}, options.Find().SetSort(bson.D{{"rating", 1}}))
+
+          .. output::
+             :language: go
+
+             [{type Chrysanthemum} {rating 5} ... ]
+             [{type Assam} {rating 7} ... ]
+             [{type English Breakfast} {rating 8} ... ]
+
+   * - | **Project Document Fields When Retrieving Them**
+       |
+       | `API Documentation <{+api+}/classes/FindCursor.html#project>`__
+       | :ref:`Fundamentals <compound-operations-golang>`
+
+     - .. io-code-block::
+          :copyable: true
+
+          .. input::
+             :language: go
+
+             cursor, err := coll.Find(
+               context.TODO(), 
+               bson.D{},
+               options.Find().SetProjection(
+                 bson.D{{"vendor", 0}, {"_id",0}}
+               )
+             )
+
+          .. output::
+             :language: go
+
+             [{type Masala} {rating 10}]
+             [{type English Breakfast} {rating 8}]
+             ...
+
+   * - | **Create an Index**
+       |
+       | `API Documentation <{+api+}/classes/Collection.html#createIndex>`__
+       | :ref:`Fundamentals <compound-operations-golang>`
+
+     - .. code-block:: javascript
+          :copyable: true
+
+          model := mongo.IndexModel{Keys: bson.D{{"type", 1}, {"rating", -1}}}
+
+   * - | **Search Text**
+       |
+       | `API Documentation <{+api+}/classes/Collection.html#find>`__
+       | :ref:`Fundamentals <compound-operations-golang>`
+
+     - .. io-code-block::
+          :copyable: true
+
+          .. input::
+             :language: go
+
+             // only searches fields with text indexes
+             cursor, err := coll.Find(context.TODO(), bson.D{{"$text", bson.D{{"$search", "Breakfast"}}}})
+
+          .. output::
+             :language: go
+
+             
+             [{type English Breakfast} {rating 8} ... ]
